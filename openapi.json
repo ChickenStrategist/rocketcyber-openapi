@@ -1,0 +1,311 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "RocketCyber Customer API",
+    "version": "v3",
+    "description": "Unofficial OpenAPI spec for RocketCyber Customer API v3. Uses Bearer token auth from Provider Settings.",
+    "contact": {
+      "name": "RocketCyber",
+      "url": "https://api-doc.rocketcyber.com/"
+    }
+  },
+  "servers": [
+    { "url": "https://api-us.rocketcyber.com/v3", "description": "US" },
+    { "url": "https://api-eu.rocketcyber.com/v3", "description": "EU" }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/accounts": {
+      "get": {
+        "operationId": "listAccounts",
+        "summary": "List accounts (customers/organizations)",
+        "parameters": [
+          { "name": "id", "in": "query", "schema": { "type": "string" }, "description": "Filter by account ID" },
+          { "name": "name", "in": "query", "schema": { "type": "string" }, "description": "Filter by account name (partial match)" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 }, "description": "Page number" },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500 }, "description": "Items per page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaginatedAccounts" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/agents": {
+      "get": {
+        "operationId": "listAgents",
+        "summary": "List endpoint agents",
+        "parameters": [
+          { "name": "id", "in": "query", "schema": { "type": "string" }, "description": "Filter by agent ID" },
+          { "name": "accountId", "in": "query", "schema": { "type": "string" }, "description": "Filter by account ID" },
+          { "name": "hostname", "in": "query", "schema": { "type": "string" }, "description": "Filter by hostname" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agents list",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedAgents" } } }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/apps": {
+      "get": {
+        "operationId": "listApps",
+        "summary": "List RocketCyber apps (detectors/integrations)",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apps list",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedApps" } } }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/defender": {
+      "get": {
+        "operationId": "getDefenderSummary",
+        "summary": "Microsoft Defender summary/status (tenant-wide)",
+        "parameters": [
+          { "name": "accountId", "in": "query", "schema": { "type": "string" }, "description": "Optional account filter" }
+        ],
+        "responses": {
+          "200": { "description": "Defender data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DefenderSummary" } } } },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "List security events",
+        "parameters": [
+          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" }, "description": "ISO8601 start time filter" },
+          { "name": "until", "in": "query", "schema": { "type": "string", "format": "date-time" }, "description": "ISO8601 end time filter" },
+          { "name": "accountId", "in": "query", "schema": { "type": "string" } },
+          { "name": "agentId", "in": "query", "schema": { "type": "string" } },
+          { "name": "severity", "in": "query", "schema": { "type": "string", "enum": ["low", "medium", "high", "critical"] } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 1000 } }
+        ],
+        "responses": {
+          "200": { "description": "Events list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedEvents" } } } },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/firewalls": {
+      "get": {
+        "operationId": "listFirewalls",
+        "summary": "List discovered/configured firewalls",
+        "parameters": [
+          { "name": "accountId", "in": "query", "schema": { "type": "string" } },
+          { "name": "vendor", "in": "query", "schema": { "type": "string" }, "description": "e.g., Fortinet, Palo Alto, SonicWall" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": { "description": "Firewalls list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedFirewalls" } } } },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/incidents": {
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "List SOC incidents",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["open", "in_progress", "closed"] } },
+          { "name": "severity", "in": "query", "schema": { "type": "string", "enum": ["low", "medium", "high", "critical"] } },
+          { "name": "accountId", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500 } }
+        ],
+        "responses": {
+          "200": { "description": "Incidents list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedIncidents" } } } },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/office": {
+      "get": {
+        "operationId": "getOfficeSummary",
+        "summary": "Microsoft 365/Office summary",
+        "parameters": [
+          { "name": "accountId", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Office data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OfficeSummary" } } } },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Unauthorized – invalid or missing token",
+        "content": {
+          "application/json": {
+            "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Paginated": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "pageSize": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "externalId": { "type": "string", "nullable": true },
+          "status": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "hostname": { "type": "string" },
+          "accountId": { "type": "string" },
+          "os": { "type": "string" },
+          "lastSeen": { "type": "string", "format": "date-time" },
+          "ip": { "type": "string" }
+        },
+        "required": ["id", "hostname", "accountId"]
+      },
+      "App": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "enabled": { "type": "boolean" }
+        },
+        "required": ["key", "name"]
+      },
+      "DefenderSummary": {
+        "type": "object",
+        "properties": {
+          "accounts": { "type": "integer" },
+          "devicesAtRisk": { "type": "integer" },
+          "alerts24h": { "type": "integer" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "severity": { "type": "string" },
+          "type": { "type": "string" },
+          "accountId": { "type": "string" },
+          "agentId": { "type": "string", "nullable": true },
+          "message": { "type": "string" }
+        },
+        "required": ["id", "timestamp", "severity", "type", "accountId"]
+      },
+      "Incident": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" },
+          "severity": { "type": "string" },
+          "accountId": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "status", "severity", "accountId", "title"]
+      },
+      "Firewall": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "vendor": { "type": "string" },
+          "model": { "type": "string" },
+          "accountId": { "type": "string" }
+        },
+        "required": ["id", "vendor", "accountId"]
+      },
+      "OfficeSummary": {
+        "type": "object",
+        "properties": {
+          "licensedUsers": { "type": "integer" },
+          "activeAlerts": { "type": "integer" }
+        }
+      },
+      "PaginatedAccounts": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Account" } } } }
+        ]
+      },
+      "PaginatedAgents": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Agent" } } } }
+        ]
+      },
+      "PaginatedApps": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/App" } } } }
+        ]
+      },
+      "PaginatedEvents": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Event" } } } }
+        ]
+      },
+      "PaginatedIncidents": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Incident" } } } }
+        ]
+      },
+      "PaginatedFirewalls": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Paginated" },
+          { "type": "object", "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Firewall" } } } }
+        ]
+      }
+    }
+  },
+  "tags": [
+    { "name": "Accounts" },
+    { "name": "Agents" },
+    { "name": "Apps" },
+    { "name": "Defender" },
+    { "name": "Events" },
+    { "name": "Firewalls" },
+    { "name": "Incidents" },
+    { "name": "Office" }
+  ]
+}
